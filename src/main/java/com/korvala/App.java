@@ -1,30 +1,16 @@
 package com.korvala;
 
-import java.util.HashSet;
-import java.util.Set;
+import com.korvala.dependencyinjection.DiBuilder;
 
-/**
- * Hello world!
- */
 public final class App {
-    private App() {
-    }
-
     public static void main(String[] args) throws Exception {
-        start(createContext());
-    }
+        var context = DiBuilder
+                .startBuild()
+                .addService(IServiceA.class, ServiceA.class)
+                .addService(IServiceB.class, ServiceB.class)
+                .addService(IServiceC.class, ServiceAC.class)
+                .build();
 
-    public static DependencyInjectionContext createContext() throws Exception {
-        Set<Class<?>> services = new HashSet<>();
-        services.add(ServiceA.class);
-        services.add(ServiceB.class);
-        services.add(ServiceC.class);
-        return new DependencyInjectionContext(services);
-    }
-
-    public static void start(DependencyInjectionContext context) {
-        ServiceA serviceA = context.getServiceInstance(ServiceA.class);
-
-        System.out.println(serviceA.jobA());
+        System.out.println(context.getService(ServiceA.class).jobA());
     }
 }

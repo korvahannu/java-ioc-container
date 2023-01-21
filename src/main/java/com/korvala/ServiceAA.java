@@ -2,13 +2,13 @@ package com.korvala;
 
 import com.korvala.dependencyinjection.Inject;
 
-public class ServiceA implements IServiceA {
+public class ServiceAA implements IServiceA {
 
     @Inject
     private IServiceB serviceB;
 
     @Override
     public String jobA() {
-        return "jobA(" + this.serviceB.jobB() + ")";
+        return "jobAA(" + this.serviceB.jobB() + ")";
     }
 }
