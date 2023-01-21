@@ -6,16 +6,38 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Collection;
 
+/**
+ * DiBuilder: Builder pattern: builds a context for dependency injection
+ * 
+ * @author Hannu Korvala
+ */
 public class DiBuilder {
 
+    /**
+     * DiContext: Context that you can use to get services
+     * 
+     * @author Hannu Korvala
+     */
     public class DiContext {
         private final Set<Object> serviceInstances = new HashSet<>();
 
+        /**
+         * Constructor. DiContext can only be built from the DiBuilder
+         * 
+         * @param services List of services defined by the you
+         * @throws Exception
+         */
         private DiContext(final Collection<Class<?>> services) throws Exception {
             generateInstances(services);
             mapFieldsToInstances(services);
         }
 
+        /**
+         * Use to get an instance for a service
+         * 
+         * @param serviceClass class type of what service you wish to receive
+         * @return instance of the service you want
+         */
         @SuppressWarnings("unchecked")
         public <T> T getService(final Class<T> serviceClass) {
             for (Object serviceInstance : this.serviceInstances) {
@@ -26,6 +48,12 @@ public class DiBuilder {
             return null;
         }
 
+        /**
+         * Generates class instances from a collection of Class<?> types
+         * 
+         * @param services Collection<Class<?>>
+         * @throws Exception
+         */
         private void generateInstances(final Collection<Class<?>> services) throws Exception {
             for (Class<?> serviceClass : services) {
                 Constructor<?> constructor = serviceClass.getConstructor();
@@ -35,10 +63,19 @@ public class DiBuilder {
             }
         }
 
+        /**
+         * Maps the serviceInstances' fields
+         * 
+         * @param services Services as a collection of Class<?>
+         * @throws Exception
+         */
         private void mapFieldsToInstances(final Collection<Class<?>> services) throws Exception {
             for (Object serviceInstance : this.serviceInstances) {
                 for (Field field : serviceInstance.getClass().getDeclaredFields()) {
 
+                    /**
+                     * Only map fields that are marked with @Inject -attribute
+                     */
                     if (!field.isAnnotationPresent(Inject.class)) {
                         continue;
                     }
@@ -59,6 +96,13 @@ public class DiBuilder {
     private Set<Class<?>> serviceInterfaces = new HashSet<>();
     private Set<Class<?>> services = new HashSet<>();
 
+    /**
+     * Add a service to dependency injection
+     * 
+     * @param serviceInterface Interface the service implements
+     * @param service          Implementation of said interface
+     * @return
+     */
     public DiBuilder addService(final Class<?> serviceInterface, final Class<?> service) {
         if (doesInterfaceMatchWithClass(serviceInterface, service) == false) {
             throw new IllegalArgumentException();
@@ -81,6 +125,13 @@ public class DiBuilder {
         return new DiContext(services);
     }
 
+    /**
+     * Helper class that checks if a class implements an interface
+     * 
+     * @param serviceInterface interface that should be implemented
+     * @param service          implementing class that should implement interface
+     * @return
+     */
     private boolean doesInterfaceMatchWithClass(final Class<?> serviceInterface, final Class<?> service) {
         Class<?>[] interfaces = service.getInterfaces();
         boolean isValidInterface = false;
