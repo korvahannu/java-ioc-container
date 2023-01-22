@@ -1,7 +1,5 @@
 package com.korvala;
 
-import com.korvala.dependencyinjection.Inject;
-
 public class ServiceB implements IServiceB {
 
     @Inject
