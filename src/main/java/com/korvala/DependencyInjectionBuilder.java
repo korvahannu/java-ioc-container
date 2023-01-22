@@ -2,6 +2,10 @@ package com.korvala;
 
 import java.util.HashSet;
 import java.util.Set;
+
+import com.korvala.dependencyinjection.abstractions.DependencyInjectionContext;
+import com.korvala.dependencyinjection.abstractions.DependencyInjectionContextBuilder;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.Collection;
@@ -11,7 +15,7 @@ import java.util.Collection;
  * 
  * @author Hannu Korvala
  */
-public class DependencyInjection implements DependencyInjectionContextBuilder {
+public class DependencyInjectionBuilder implements DependencyInjectionContextBuilder {
 
     /**
      * DiContext: Context that you can use to get services
@@ -103,7 +107,7 @@ public class DependencyInjection implements DependencyInjectionContextBuilder {
      * @param service          Implementation of said interface
      * @return
      */
-    public DependencyInjection addService(final Class<?> serviceInterface, final Class<?> service) {
+    public DependencyInjectionBuilder addService(final Class<?> serviceInterface, final Class<?> service) {
         if (doesInterfaceMatchWithClass(serviceInterface, service) == false) {
             throw new IllegalArgumentException();
         }
@@ -117,8 +121,8 @@ public class DependencyInjection implements DependencyInjectionContextBuilder {
         return this;
     }
 
-    public static DependencyInjection startBuild() {
-        return new DependencyInjection();
+    public static DependencyInjectionBuilder startBuild() {
+        return new DependencyInjectionBuilder();
     }
 
     public Context build() throws Exception {
