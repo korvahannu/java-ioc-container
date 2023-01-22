@@ -14,4 +14,8 @@ public class ServiceAC implements IServiceA, IServiceC {
         return null;
     }
 
+    @Override
+    public IServiceF getServiceF() {
+        return null;
+    }
 }

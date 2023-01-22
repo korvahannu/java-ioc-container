@@ -109,4 +109,31 @@ public class DiBuilderTests {
 
         assertEquals(first, second);
     }
+
+    @Test
+    public void nonExistingServiceShouldReturnNull() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceA.class, ServiceA.class)
+                .build();
+
+        var target = context.getService(IServiceB.class);
+
+        assertEquals(target, null);
+    }
+
+    @Test
+    public void itemsNotMarkedAsInjectedShouldNotBeInContext() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceA.class, ServiceA.class)
+                .addService(IServiceB.class, ServiceB.class)
+                .addService(IServiceC.class, ServiceC.class)
+                .addService(IServiceF.class, ServiceF.class)
+                .build();
+
+        var target = context.getService(IServiceA.class);
+
+        assertEquals(target.getServiceF(), null);
+    }
 }

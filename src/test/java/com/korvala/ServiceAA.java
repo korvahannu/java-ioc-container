@@ -9,4 +9,9 @@ public class ServiceAA implements IServiceA {
     public String jobA() {
         return "jobAA(" + this.serviceB.jobB() + ")";
     }
+
+    @Override
+    public IServiceF getServiceF() {
+        return null;
+    }
 }
