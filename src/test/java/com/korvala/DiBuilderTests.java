@@ -6,6 +6,8 @@ import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
+import com.korvala.dependencyinjection.DependencyInjectionBuilder;
+
 public class DiBuilderTests {
     @Test(expected = IllegalArgumentException.class)
     public void shouldThrowWhenSameInterfaceIsRegisteredTwice() {

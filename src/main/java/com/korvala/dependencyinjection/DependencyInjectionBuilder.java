@@ -1,8 +1,7 @@
-package com.korvala;
+package com.korvala.dependencyinjection;
 
 import java.util.List;
 
-import com.korvala.dependencyinjection.ServicePair;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContext;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContextBuilder;
 

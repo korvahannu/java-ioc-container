@@ -1,4 +1,4 @@
-package com.korvala;
+package com.korvala.dependencyinjection;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
