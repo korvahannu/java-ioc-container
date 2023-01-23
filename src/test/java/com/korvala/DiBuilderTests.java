@@ -1,6 +1,7 @@
 package com.korvala;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
@@ -65,7 +66,7 @@ public class DiBuilderTests {
                 .addService(IServiceC.class, ServiceC.class)
                 .build();
 
-        context.getService(IServiceA.class);
+        assertNotNull(context.getService(IServiceA.class));
     }
 
     @Test
@@ -77,9 +78,13 @@ public class DiBuilderTests {
                 .addService(IServiceC.class, ServiceC.class)
                 .build();
 
-        context.getService(IServiceA.class);
-        context.getService(IServiceA.class);
-        context.getService(IServiceA.class);
+        assertNotNull(context.getService(IServiceA.class));
+        assertNotNull(context.getService(IServiceB.class));
+        assertNotNull(context.getService(IServiceC.class));
+
+        assertTrue(context.getService(IServiceA.class) instanceof IServiceA);
+        assertTrue(context.getService(IServiceB.class) instanceof IServiceB);
+        assertTrue(context.getService(IServiceC.class) instanceof IServiceC);
     }
 
     @Test
@@ -91,9 +96,12 @@ public class DiBuilderTests {
                 .addService(IServiceC.class, ServiceC.class)
                 .build();
 
-        context.getService(IServiceA.class);
-        context.getService(IServiceB.class);
-        context.getService(IServiceC.class);
+        assertNotNull(context.getService(IServiceA.class));
+        assertNotNull(context.getService(IServiceB.class));
+        assertNotNull(context.getService(IServiceC.class));
+        assertTrue(context.getService(IServiceA.class) instanceof IServiceA);
+        assertTrue(context.getService(IServiceB.class) instanceof IServiceB);
+        assertTrue(context.getService(IServiceC.class) instanceof IServiceC);
     }
 
     @Test
@@ -108,6 +116,8 @@ public class DiBuilderTests {
         var first = context.getService(IServiceA.class);
         var second = context.getService(IServiceA.class);
 
+        assertNotNull(first);
+        assertNotNull(second);
         assertEquals(first, second);
     }
 
@@ -149,5 +159,25 @@ public class DiBuilderTests {
         var target = context.getService(IServiceC.class);
 
         assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof ServiceC);
+    }
+
+    @Test
+    public void correctTypeIsReturned2() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceC.class, ServiceC.class)
+                .addService(IServiceA.class, ServiceAC.class) // implements IServiceA and IServiceC
+                .build();
+
+        var target = context.getService(IServiceC.class);
+
+        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof ServiceC);
+    }
+
+    @Test
+    public void finishingEmptyBuildShouldNotThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .build();
     }
 }

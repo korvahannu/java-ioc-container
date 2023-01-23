@@ -1,14 +1,14 @@
 package com.korvala;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.List;
 
+import com.korvala.dependencyinjection.ServiceInterfacePair;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContext;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContextBuilder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.util.Collection;
+import java.util.ArrayList;
 
 /**
  * DiBuilder: Builder pattern: builds a context for dependency injection
@@ -23,7 +23,7 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
      * @author Hannu Korvala
      */
     public class Context implements DependencyInjectionContext {
-        private final Set<Object> serviceInstances = new HashSet<>();
+        private List<ServiceInterfacePair<Class<?>, Object>> serviceContainer = new ArrayList<>();
 
         /**
          * Constructor. DiContext can only be built from the DiBuilder
@@ -31,9 +31,9 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
          * @param services List of services defined by the you
          * @throws Exception
          */
-        private Context(final Collection<Class<?>> services) throws Exception {
+        private Context(final List<ServiceInterfacePair<Class<?>, Class<?>>> services) throws Exception {
             generateInstances(services);
-            mapFieldsToInstances(services);
+            mapFieldsToInstances();
         }
 
         /**
@@ -43,10 +43,11 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
          * @return instance of the service you want
          */
         @SuppressWarnings("unchecked")
-        public <T> T getService(final Class<T> serviceClass) {
-            for (Object serviceInstance : this.serviceInstances) {
-                if (serviceClass.isInstance(serviceInstance)) {
-                    return (T) serviceInstance;
+        public <T> T getService(final Class<T> serviceInterface) {
+            for (int i = 0; i < this.serviceContainer.size(); i++) {
+                var targetInterface = serviceContainer.get(i).getServiceInterface();
+                if (targetInterface.equals(serviceInterface)) {
+                    return (T) serviceContainer.get(i).getServiceClass();
                 }
             }
             return null;
@@ -58,12 +59,14 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
          * @param services Collection<Class<?>>
          * @throws Exception
          */
-        private void generateInstances(final Collection<Class<?>> services) throws Exception {
-            for (Class<?> serviceClass : services) {
+        private void generateInstances(final List<ServiceInterfacePair<Class<?>, Class<?>>> services) throws Exception {
+            for (int i = 0; i < services.size(); i++) {
+                Class<?> serviceClass = services.get(i).getServiceClass();
                 Constructor<?> constructor = serviceClass.getConstructor();
                 constructor.setAccessible(true);
                 Object serviceInstance = constructor.newInstance();
-                this.serviceInstances.add(serviceInstance);
+                this.serviceContainer.add(new ServiceInterfacePair<Class<?>, Object>(
+                        services.get(i).getServiceInterface(), serviceInstance));
             }
         }
 
@@ -77,8 +80,10 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
          * @param services Services as a collection of Class<?>
          * @throws Exception
          */
-        private void mapFieldsToInstances(final Collection<Class<?>> services) throws Exception {
-            for (Object serviceInstance : this.serviceInstances) {
+        private void mapFieldsToInstances()
+                throws Exception {
+            for (int i = 0; i < this.serviceContainer.size(); i++) {
+                Object serviceInstance = this.serviceContainer.get(i).getServiceClass();
                 for (Field field : serviceInstance.getClass().getDeclaredFields()) {
 
                     /**
@@ -95,7 +100,8 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
                      * Here we iterate through serviceInstances again to find the correct matching
                      * field instance
                      */
-                    for (Object matchPartner : this.serviceInstances) {
+                    for (int j = 0; j < this.serviceContainer.size(); j++) {
+                        Object matchPartner = this.serviceContainer.get(j).getServiceClass();
                         if (fieldType.isInstance(matchPartner)) {
                             field.set(serviceInstance, matchPartner);
                             continue;
@@ -106,8 +112,7 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
         }
     }
 
-    private Set<Class<?>> serviceInterfaces = new HashSet<>();
-    private Set<Class<?>> services = new HashSet<>();
+    private List<ServiceInterfacePair<Class<?>, Class<?>>> serviceRegstrationContainer = new ArrayList<>();
 
     /**
      * Add a service to dependency injection
@@ -124,12 +129,11 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
             throw new IllegalArgumentException("Service does not implement designated interface");
         }
 
-        if (serviceInterfaces.contains(serviceInterface)) {
+        if (hasServiceBeenRegistered(serviceInterface)) {
             throw new IllegalArgumentException("Service with interface has already been added");
         }
 
-        serviceInterfaces.add(serviceInterface);
-        services.add(service);
+        this.serviceRegstrationContainer.add(new ServiceInterfacePair<Class<?>, Class<?>>(serviceInterface, service));
         return this;
     }
 
@@ -138,7 +142,7 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
     }
 
     public Context build() throws Exception {
-        return new Context(services);
+        return new Context(this.serviceRegstrationContainer);
     }
 
     /**
@@ -159,5 +163,15 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
         }
 
         return isValidInterface;
+    }
+
+    private boolean hasServiceBeenRegistered(final Class<?> serviceInterface) {
+        for (int i = 0; i < this.serviceRegstrationContainer.size(); i++) {
+            if (serviceInterface.equals(this.serviceRegstrationContainer.get(i).getServiceInterface())) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
