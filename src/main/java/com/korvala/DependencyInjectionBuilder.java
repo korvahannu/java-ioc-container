@@ -2,7 +2,7 @@ package com.korvala;
 
 import java.util.List;
 
-import com.korvala.dependencyinjection.ServiceInterfacePair;
+import com.korvala.dependencyinjection.ServicePair;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContext;
 import com.korvala.dependencyinjection.abstractions.DependencyInjectionContextBuilder;
 
@@ -11,27 +11,32 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 /**
- * DiBuilder: Builder pattern: builds a context for dependency injection
+ * DependencyInjectionBuilder: Builder pattern: builds a context for dependency
+ * injection
+ * 
+ * This implementation is unfortunately dependenant on ServicePair
+ * -implementation. Todo!
  * 
  * @author Hannu Korvala
  */
 public class DependencyInjectionBuilder implements DependencyInjectionContextBuilder {
 
     /**
-     * DiContext: Context that you can use to get services
+     * Context that you can use to get services
      * 
      * @author Hannu Korvala
      */
     public class Context implements DependencyInjectionContext {
-        private List<ServiceInterfacePair<Class<?>, Object>> serviceContainer = new ArrayList<>();
+        private List<ServicePair<Class<?>, Object>> serviceContainer = new ArrayList<>();
 
         /**
-         * Constructor. DiContext can only be built from the DiBuilder
+         * Constructor. Context can only be built from the DependencyInjectionBuilder
          * 
-         * @param services List of services defined by the you
+         * @param services List of interfaces and their class implementations defined by
+         *                 the you
          * @throws Exception
          */
-        private Context(final List<ServiceInterfacePair<Class<?>, Class<?>>> services) throws Exception {
+        private Context(final List<ServicePair<Class<?>, Class<?>>> services) throws Exception {
             generateInstances(services);
             mapFieldsToInstances();
         }
@@ -54,18 +59,19 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
         }
 
         /**
-         * Generates class instances from a collection of Class<?> types
+         * Generates class instances from a collection of ServiceInterfaceClassPair
          * 
          * @param services Collection<Class<?>>
          * @throws Exception
          */
-        private void generateInstances(final List<ServiceInterfacePair<Class<?>, Class<?>>> services) throws Exception {
+        private void generateInstances(final List<ServicePair<Class<?>, Class<?>>> services)
+                throws Exception {
             for (int i = 0; i < services.size(); i++) {
                 Class<?> serviceClass = services.get(i).getServiceClass();
                 Constructor<?> constructor = serviceClass.getConstructor();
                 constructor.setAccessible(true);
                 Object serviceInstance = constructor.newInstance();
-                this.serviceContainer.add(new ServiceInterfacePair<Class<?>, Object>(
+                this.serviceContainer.add(new ServicePair<Class<?>, Object>(
                         services.get(i).getServiceInterface(), serviceInstance));
             }
         }
@@ -112,7 +118,7 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
         }
     }
 
-    private List<ServiceInterfacePair<Class<?>, Class<?>>> serviceRegstrationContainer = new ArrayList<>();
+    private List<ServicePair<Class<?>, Class<?>>> serviceRegstrationContainer = new ArrayList<>();
 
     /**
      * Add a service to dependency injection
@@ -133,7 +139,8 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
             throw new IllegalArgumentException("Service with interface has already been added");
         }
 
-        this.serviceRegstrationContainer.add(new ServiceInterfacePair<Class<?>, Class<?>>(serviceInterface, service));
+        this.serviceRegstrationContainer
+                .add(new ServicePair<Class<?>, Class<?>>(serviceInterface, service));
         return this;
     }
 
