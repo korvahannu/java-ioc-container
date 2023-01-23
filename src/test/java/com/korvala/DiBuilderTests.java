@@ -157,8 +157,10 @@ public class DiBuilderTests {
                 .build();
 
         var target = context.getService(IServiceC.class);
+        var target2 = context.getService(IServiceA.class);
 
-        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof ServiceC);
+        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof IServiceC);
+        assertTrue("Fetching IServiceA should return correct class assigned to it", target2 instanceof IServiceA);
     }
 
     @Test
@@ -170,8 +172,10 @@ public class DiBuilderTests {
                 .build();
 
         var target = context.getService(IServiceC.class);
+        var target2 = context.getService(IServiceA.class);
 
-        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof ServiceC);
+        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof IServiceC);
+        assertTrue("Fetching IServiceA should return correct class assigned to it", target2 instanceof IServiceA);
     }
 
     @Test
