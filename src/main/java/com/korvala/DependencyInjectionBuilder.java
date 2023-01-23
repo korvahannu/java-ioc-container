@@ -69,6 +69,10 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
 
         /**
          * Maps the serviceInstances' fields
+         * Essentially this method loops through are instances generated in
+         * generateInstances -method
+         * and then iterates over each of their fields and assigns them with other
+         * instances generated in generateInstances -method
          * 
          * @param services Services as a collection of Class<?>
          * @throws Exception
@@ -87,9 +91,14 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
                     Class<?> fieldType = field.getType();
                     field.setAccessible(true);
 
+                    /**
+                     * Here we iterate through serviceInstances again to find the correct matching
+                     * field instance
+                     */
                     for (Object matchPartner : this.serviceInstances) {
                         if (fieldType.isInstance(matchPartner)) {
                             field.set(serviceInstance, matchPartner);
+                            continue;
                         }
                     }
                 }
@@ -105,15 +114,18 @@ public class DependencyInjectionBuilder implements DependencyInjectionContextBui
      * 
      * @param serviceInterface Interface the service implements
      * @param service          Implementation of said interface
-     * @return
+     * @return For fluent building, returns an instance of itself
+     *         (DependencyInjectionBuilder)
+     * @throws IllegalArgumentException
      */
-    public DependencyInjectionBuilder addService(final Class<?> serviceInterface, final Class<?> service) {
+    public DependencyInjectionBuilder addService(final Class<?> serviceInterface, final Class<?> service)
+            throws IllegalArgumentException {
         if (doesInterfaceMatchWithClass(serviceInterface, service) == false) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Service does not implement designated interface");
         }
 
         if (serviceInterfaces.contains(serviceInterface)) {
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Service with interface has already been added");
         }
 
         serviceInterfaces.add(serviceInterface);

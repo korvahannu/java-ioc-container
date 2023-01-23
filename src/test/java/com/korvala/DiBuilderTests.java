@@ -1,6 +1,7 @@
 package com.korvala;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import org.junit.Test;
 
@@ -119,7 +120,7 @@ public class DiBuilderTests {
 
         var target = context.getService(IServiceB.class);
 
-        assertEquals(target, null);
+        assertEquals(null, target);
     }
 
     @Test
@@ -134,6 +135,19 @@ public class DiBuilderTests {
 
         var target = context.getService(IServiceA.class);
 
-        assertEquals(target.getServiceF(), null);
+        assertEquals(null, target.getServiceF());
+    }
+
+    @Test
+    public void correctTypeIsReturned() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceA.class, ServiceAC.class) // implements IServiceA and IServiceC
+                .addService(IServiceC.class, ServiceC.class)
+                .build();
+
+        var target = context.getService(IServiceC.class);
+
+        assertTrue("Fetching IServiceC should return correct class assigned to it", target instanceof ServiceC);
     }
 }
