@@ -186,4 +186,66 @@ public class DiBuilderTests {
                 .startBuild()
                 .build();
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void interfaceNullShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(null, ServiceA.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void classNullShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceA.class, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void bothNullsShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(null, null);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doubleClassesProvidedShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(ServiceA.class, ServiceA.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void doubleInterfacesShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(IServiceA.class, IServiceA.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void interfaceAndClassWrongWayShouldThrow() throws Exception {
+        DependencyInjectionBuilder
+                .startBuild()
+                .addService(ServiceA.class, IServiceA.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void gettingServiceWithClassImplementationShouldThrow() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(ServiceA.class, IServiceA.class)
+                .build();
+
+        context.getService(ServiceA.class);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void gettingServiceWithNullShouldThrow() throws Exception {
+        var context = DependencyInjectionBuilder
+                .startBuild()
+                .addService(ServiceA.class, IServiceA.class)
+                .build();
+
+        context.getService(null);
+    }
 }
